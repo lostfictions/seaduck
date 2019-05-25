@@ -5,7 +5,7 @@
   "homepage": "https://github.com/aparrish/seaduck",
   "main": "seaduck.js",
   "scripts": {
-    "build": "browserify seaduck.js --standalone seaduck > build/seaduck-bundle.js"
+    "dev": "ts-node-dev --respawn --transpileOnly src/examples/04_rooms_and_objects.ts"
   },
   "keywords": [],
   "author": "Allison Parrish <allison@decontextualize.com>",
@@ -15,6 +15,14 @@
     "tracery-grammar": "^2.7.3"
   },
   "devDependencies": {
-    "browserify": "^16.2.3"
+    "@types/node": "^12.0.1",
+    "@types/object-hash": "^1.2.0",
+    "@typescript-eslint/eslint-plugin": "^1.8.0",
+    "@typescript-eslint/parser": "^1.8.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.1.0",
+    "prettier": "^1.17.0",
+    "ts-node-dev": "^1.0.0-pre.39",
+    "typescript": "^3.4.4"
   }
 }
