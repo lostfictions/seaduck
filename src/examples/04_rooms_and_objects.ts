@@ -1,5 +1,12 @@
 import { Narrative, StoryEvent, choice } from "../main";
 
+const randomPronouns = () =>
+  choice([
+    { ps: "he", po: "him", pp: "his" },
+    { ps: "she", po: "her", pp: "her" },
+    { ps: "they", po: "them", pp: "their" }
+  ]);
+
 const n = new Narrative({
   nouns: [
     {
@@ -20,14 +27,16 @@ const n = new Narrative({
     {
       name: "Max",
       properties: {
-        has_drink: false
+        has_drink: false,
+        ...randomPronouns()
       },
       tags: ["person"]
     },
     {
       name: "Rory",
       properties: {
-        has_drink: false
+        has_drink: false,
+        ...randomPronouns()
       },
       tags: ["person"]
     },
@@ -153,20 +162,20 @@ const n = new Narrative({
     ],
     chatsWith: [
       "#nounA# and #nounB# chatted for a bit.",
-      "#nounA# asked #nounB# how their day was going.",
-      "#nounB# told #nounA# about a dream they had last night.",
+      "#nounA# asked #nounB# how #nounB_pp# day was going.",
+      "#nounB# told #nounA# about a dream #nounB_ps# had last night.",
       "#nounA# and #nounB# talked for a bit about #topic#."
     ],
     isWorking: [
-      "#nounA# typed furiously on their laptop.",
+      "#nounA# typed furiously on #nounA_pp# laptop.",
       "#nounA# was taking notes while reading a book from the library.",
-      "#nounA# sighed as they clicked 'Send' on another e-mail."
+      "#nounA# sighed as #nounA_ps# clicked 'Send' on another e-mail."
     ],
     videoGame: ["Destiny 2", "Splatoon 2", "Skyrim", "Zelda", "Bejeweled"],
     playGames: [
       "#nounA# sat down to play #videoGame# for a while.",
       "#nounA# decided to get a few minutes of #videoGame# in.",
-      "#nounA# turned on the video game console. 'Ugh I love #videoGame# so much,' said #nounA#."
+      "#nounA# turned on the video game console. 'Ugh I love #videoGame# so much,' #nounA_ps# said."
     ],
     _end: ["The end."]
   }
