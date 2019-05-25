@@ -49,6 +49,7 @@ interface Action2 {
   action(this: Narrative, a: Noun, b: Noun): IterableIterator<StoryEvent>;
 }
 
+const isAction1 = (a: Action): a is Action1 => a.match.length === 1;
 const isAction2 = (a: Action): a is Action2 => a.match.length === 2;
 
 interface NarrativeDefinition {
@@ -60,6 +61,11 @@ interface NarrativeDefinition {
   initialize?(this: Narrative): IterableIterator<StoryEvent>;
 }
 
+export function choice<T>(t: T[]): T {
+  // convenience function for selecting among alternatives in a list
+  return t[Math.floor(Math.random() * t.length)];
+}
+
 export class Narrative {
   narrative: NarrativeDefinition;
   stepCount = 0;
@@ -69,11 +75,6 @@ export class Narrative {
 
   constructor(narrative: NarrativeDefinition) {
     this.narrative = narrative;
-  }
-
-  choice<T>(t: T[]): T {
-    // convenience function for selecting among alternatives in a list
-    return t[Math.floor(Math.random() * t.length)];
   }
 
   noun(name: string): Noun {
@@ -221,14 +222,13 @@ export class Narrative {
         }
       }
       // for matches with one parameter
-      else if (action.match.length == 1) {
+      else if (isAction1(action)) {
         const matching = this.narrative.nouns.filter(item =>
           filterTagMatch(action.match[0], item)
         );
 
-        // FIXME
-        const boundWhen = action.when.bind(this) as any;
-        const boundAction = action.action.bind(this) as any;
+        const boundWhen = action.when.bind(this);
+        const boundAction = action.action.bind(this);
         for (const obj of matching) {
           if (boundWhen(obj)) {
             for (const sEvent of boundAction(obj)) {
@@ -246,11 +246,10 @@ export class Narrative {
     this.stepCount++;
 
     // if the last two states are identical, or no events generated, the end
-    const shLen = this.stateHistory.length;
+    const sl = this.stateHistory.length;
 
     if (
-      (shLen >= 2 &&
-        this.stateHistory[shLen - 1] == this.stateHistory[shLen - 2]) ||
+      (sl >= 2 && this.stateHistory[sl - 1] == this.stateHistory[sl - 2]) ||
       events.length == 0
     ) {
       // _end is a special sentinel value to signal the end of the narration
@@ -260,6 +259,7 @@ export class Narrative {
 
     return events;
   }
+
   renderEvent(ev: StoryEvent): string {
     // renders an event using the associated tracery rule
     const discourseCopy = JSON.parse(
@@ -268,32 +268,23 @@ export class Narrative {
     if (ev.a) {
       discourseCopy["nounA"] = ev.a.name;
       // copy properties as nounA_<propertyname>
-      for (const k in ev.a.properties) {
-        if (ev.a.properties.hasOwnProperty(k)) {
-          discourseCopy["nounA_" + k] = ev.a.properties[k];
-        }
+      for (const [k, v] of Object.entries(ev.a.properties)) {
+        discourseCopy[`nounA_${k}`] = v;
       }
     }
     if (ev.b) {
       discourseCopy["nounB"] = ev.b.name;
-      for (const k in ev.b.properties) {
-        if (ev.b.properties.hasOwnProperty(k)) {
-          discourseCopy["nounB_" + k] = ev.b.properties[k];
-        }
+      for (const [k, v] of Object.entries(ev.b.properties)) {
+        discourseCopy[`nounB_${k}`] = v;
       }
     }
     const grammar = tracery.createGrammar(discourseCopy);
     grammar.addModifiers(tracery.baseEngModifiers);
     return grammar.flatten("#" + ev.verb + "#");
   }
+
   stepAndRender() {
-    // combines step() and renderEvent()
-    const events = this.step();
-    const rendered = [];
-    for (const ev of events) {
-      rendered.push(this.renderEvent(ev));
-    }
-    return rendered;
+    return this.step().map(ev => this.renderEvent(ev));
   }
 }
 

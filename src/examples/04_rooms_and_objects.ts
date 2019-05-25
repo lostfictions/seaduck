@@ -1,4 +1,4 @@
-import { Narrative, StoryEvent } from "../main";
+import { Narrative, StoryEvent, choice } from "../main";
 
 const n = new Narrative({
   nouns: [
@@ -92,7 +92,7 @@ const n = new Narrative({
       action: function*(a) {
         const current = this.relatedByTag("currently in", a, "room");
         const dests = this.allRelatedByTag("connects to", current, "room");
-        const chosenDest = this.choice(dests);
+        const chosenDest = choice(dests);
         this.unrelate("currently in", a, current);
         this.relate("currently in", a, chosenDest);
         yield new StoryEvent("moveTo", a, chosenDest);
