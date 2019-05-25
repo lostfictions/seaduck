@@ -30,10 +30,6 @@ class Narrative {
     this.eventHistory = [];
     this.stateHistory = [];
   }
-  choice(t) {
-    // convenience function for selecting among alternatives in a list
-    return t[Math.floor(Math.random()*t.length)];
-  }
   noun(name) {
     // get the noun object in the narrative with the corresponding name
     for (let noun of this.narrative.nouns) {
@@ -71,7 +67,7 @@ class Narrative {
     this.relations.delete(mk([rel, a.name, b.name]));
   }
   unrelateByTag(rel, a, bTag) {
-    // remove relation rel between a and nouns tagged with bTag 
+    // remove relation rel between a and nouns tagged with bTag
     for (let noun of this.allRelatedByTag(rel, a, bTag)) {
       this.unrelate(rel, a, noun);
     }
@@ -87,7 +83,7 @@ class Narrative {
     this.relations.delete(mk([rel, b.name, a.name]))
   }
   unreciprocalByTag(rel, a, bTag) {
-    // remove reciprocal relation rel between a and nouns tagged with bTag 
+    // remove reciprocal relation rel between a and nouns tagged with bTag
     for (let noun of this.allRelatedByTag(rel, a, bTag)) {
       this.unrelate(rel, a, noun);
       this.unrelate(rel, noun, a);
@@ -176,7 +172,7 @@ class Narrative {
       }
     }
 
-    // hash the current state and store 
+    // hash the current state and store
     this.stateHistory.push(hash(this.narrative.nouns) + hash(this.relations));
 
     this.stepCount++;
@@ -258,4 +254,9 @@ class StoryEvent {
   }
 }
 
-module.exports = {Narrative: Narrative, StoryEvent: StoryEvent};
+function choice(t) {
+  // convenience function for selecting among alternatives in a list
+  return t[Math.floor(Math.random()*t.length)];
+}
+
+module.exports = {Narrative, StoryEvent, choice};

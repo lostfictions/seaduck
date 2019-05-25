@@ -1,6 +1,12 @@
-let seaduck = require("../seaduck")
+const { Narrative, StoryEvent, choice } = require("../seaduck")
 
-let n = new seaduck.Narrative({
+const randomPronouns = () => choice([
+  { ps: "he", po: "him", pp: "his" },
+  { ps: "she", po: "her", pp: "her" },
+  { ps: "they", po: "them", pp: "their" }
+]);
+
+const n = new Narrative({
   "nouns": [
     {
       "name": "kitchen",
@@ -20,14 +26,16 @@ let n = new seaduck.Narrative({
     {
       "name": "Max",
       "properties": {
-        "has_drink": false
+        "has_drink": false,
+        ...randomPronouns()
       },
       "tags": ["person"]
     },
     {
       "name": "Rory",
       "properties": {
-        "has_drink": false
+        "has_drink": false,
+        ...randomPronouns()
       },
       "tags": ["person"]
     },
@@ -52,23 +60,19 @@ let n = new seaduck.Narrative({
     // put people and objects in rooms
     this.relate(
       "currently in", this.noun("Max"), this.noun("living room"));
-    yield new seaduck.StoryEvent(
-      "in", this.noun("Max"), this.noun("living room"));
+    yield new StoryEvent("in", this.noun("Max"), this.noun("living room"));
 
     this.relate(
       "currently in", this.noun("Rory"), this.noun("study"));
-    yield new seaduck.StoryEvent(
-      "in", this.noun("Rory"), this.noun("study"));
+    yield new StoryEvent("in", this.noun("Rory"), this.noun("study"));
 
     this.relate(
       "currently in", this.noun("coffee"), this.noun("kitchen"));
-    yield new seaduck.StoryEvent(
-      "in", this.noun("coffee"), this.noun("kitchen"));
+    yield new StoryEvent("in", this.noun("coffee"), this.noun("kitchen"));
 
     this.relate(
       "currently in", this.noun("tea"), this.noun("kitchen"));
-    yield new seaduck.StoryEvent(
-      "in", this.noun("tea"), this.noun("kitchen"));
+    yield new StoryEvent("in", this.noun("tea"), this.noun("kitchen"));
 
   },
   "actions": [
@@ -81,7 +85,7 @@ let n = new seaduck.Narrative({
         return aLocation == bLocation && !a.properties.has_drink;
       },
       "action": function*(a, b) {
-        yield (new seaduck.StoryEvent("take", a, b));
+        yield new StoryEvent("take", a, b);
         // remove from all rooms
         this.unrelateByTag("currently in", b, "room");
         a.properties.has_drink = true;
@@ -97,10 +101,10 @@ let n = new seaduck.Narrative({
       "action": function*(a) {
         let current = this.relatedByTag("currently in", a, "room");
         let dests = this.allRelatedByTag("connects to", current, "room");
-        let chosenDest = this.choice(dests);
+        let chosenDest = choice(dests);
         this.unrelate("currently in", a, current);
         this.relate("currently in", a, chosenDest);
-        yield (new seaduck.StoryEvent("moveTo", a, chosenDest));
+        yield new StoryEvent("moveTo", a, chosenDest);
       }
     },
     {
@@ -112,7 +116,7 @@ let n = new seaduck.Narrative({
         return aLocation == bLocation;
       },
       "action": function*(a, b) {
-        yield (new seaduck.StoryEvent("chatsWith", a, b));
+        yield new StoryEvent("chatsWith", a, b);
       }
     },
     {
@@ -123,7 +127,7 @@ let n = new seaduck.Narrative({
           && a.properties.has_drink;
       },
       "action": function*(a) {
-        yield (new seaduck.StoryEvent("isWorking", a));
+        yield new StoryEvent("isWorking", a);
       }
     },
     {
@@ -133,7 +137,7 @@ let n = new seaduck.Narrative({
         return this.isRelated("currently in", a, this.noun("living room"));
       },
       "action": function*(a) {
-        yield (new seaduck.StoryEvent("playGames", a));
+        yield new StoryEvent("playGames", a);
       }
     }
   ],
@@ -153,20 +157,20 @@ let n = new seaduck.Narrative({
       "#nounA#'s family", "the books they've been reading"],
     "chatsWith": [
       "#nounA# and #nounB# chatted for a bit.",
-      "#nounA# asked #nounB# how their day was going.",
-      "#nounB# told #nounA# about a dream they had last night.",
+      "#nounA# asked #nounB# how #nounB_pp# day was going.",
+      "#nounB# told #nounA# about a dream #nounB_ps# had last night.",
       "#nounA# and #nounB# talked for a bit about #topic#."
     ],
     "isWorking": [
-      "#nounA# typed furiously on their laptop.",
+      "#nounA# typed furiously on #nounA_pp# laptop.",
       "#nounA# was taking notes while reading a book from the library.",
-      "#nounA# sighed as they clicked 'Send' on another e-mail."
+      "#nounA# sighed as #nounA_ps# clicked 'Send' on another e-mail."
     ],
     "videoGame": ["Destiny 2", "Splatoon 2", "Skyrim", "Zelda", "Bejeweled"],
     "playGames": [
       "#nounA# sat down to play #videoGame# for a while.",
       "#nounA# decided to get a few minutes of #videoGame# in.",
-      "#nounA# turned on the video game console. 'Ugh I love #videoGame# so much,' said #nounA#."
+      "#nounA# turned on the video game console. 'Ugh I love #videoGame# so much,' #nounA_ps# said."
     ],
     "_end": [
       "The end."
